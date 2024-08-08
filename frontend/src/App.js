@@ -1,37 +1,39 @@
 import React, { useState } from "react";
-import Dashboard from "./pages/Dashboard";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Users from "./pages/users/Users";
-import Createuser from "./pages/users/Createuser";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
-import Navbar from "./components/Navbar";
 import Toolbar from "@mui/material/Toolbar";
+import Navbar from "./components/Navbar";
 import Count from "./context/Count";
+import Dashboard from "./pages/Dashboard";
+import Users from "./pages/users/Users";
+import Createuser from "./pages/users/Createuser";
 import EditUsers from "./pages/users/Edituser";
-import Login from "./pages/Login";
+import SignIn from "./pages/Login";
 import Authlayout from "./components/layouts/Authlayout";
 import Guestlayout from "./components/layouts/Guestlayout";
+import { AuthProvider } from "./components/providers/AuthProvider";
+import Notfound from "./pages/Notfound";
+import CreateProperty from "./pages/property/CreateProperty";
+import FetchProperty from "./pages/property/FetchProperty";
 
 const defaultTheme = createTheme();
-function App() {
-  const [open, setOpen] = React.useState(true);
-  const toggleDrawer = () => {
-    setOpen(!open);
-  };
 
+function App() {
   const [title, setTitle] = useState("");
+  const[errorPath, setErrorPath] = useState("");
 
   return (
-    <div>
-      <Count.Provider value={[title, setTitle]}>
-        <BrowserRouter>
-          <ThemeProvider theme={defaultTheme}>
+    
+    <BrowserRouter>
+    <AuthProvider>
+      <ThemeProvider theme={defaultTheme}>
+        <Count.Provider value={[title, setTitle]}>
+          
             <Box sx={{ display: "flex" }}>
               <CssBaseline />
-              <Navbar title={"Dashboard"} />
-
+              <Navbar /> {/* Only one instance */}
               <Box
                 component="main"
                 sx={{
@@ -46,24 +48,26 @@ function App() {
               >
                 <Toolbar />
                 <Routes>
-                  
                   <Route element={<Guestlayout />}>
-                    <Route exact path="/" element={<Dashboard />} />
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/login" element={<SignIn />} />
+                   
                   </Route>
-
                   <Route element={<Authlayout />}>
+                    <Route exact path="/" element={<Dashboard />} />
                     <Route exact path="/users" element={<Users />} />
                     <Route exact path="/createuser" element={<Createuser />} />
-                    <Route path="/users/edit/:id" element={<EditUsers />} />
+                    <Route exact path="/users/edit/:id" element={<EditUsers />} />
+                    <Route exact path="/fetchproperty" element={<FetchProperty />} />
+                    <Route exact path ="/createproperty" element = {<CreateProperty/>}/>
+
                   </Route>
+               
                 </Routes>
               </Box>
             </Box>
-          </ThemeProvider>
-        </BrowserRouter>
-      </Count.Provider>
-    </div>
+        </Count.Provider>
+      </ThemeProvider>
+    </AuthProvider></BrowserRouter>
   );
 }
 

@@ -1,16 +1,18 @@
-import React from "react";
-import { useAuth } from './../../context/Authcontext';
-
-import { Outlet,  useNavigate } from "react-router-dom";
+import React, { useContext } from "react";
+import { Outlet, Navigate } from "react-router-dom";
+import AuthContext from "../providers/AuthProvider";
+import { isLogin } from "../../auth";
 
 function Guestlayout() {
-const { user } = useAuth();
-  const navigate = useNavigate();
-  if (!user) {
-    return <Outlet />;
-  } else {
-    navigate("/dashboard"); 
+  const { user } = useContext(AuthContext);
+
+  // If the user is logged in, navigate to the home page
+  if (isLogin()) {
+    return <Navigate to="/" replace  = {true}/>;
   }
+
+  // Otherwise, render the nested routes
+  return <Outlet />;
 }
 
 export default Guestlayout;

@@ -8,7 +8,9 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
-const usersRoute = require('./Routes/User');
+//const usersRoute = require('./Routes/User');
+const usersRoute = require('./Routes/UserRoute');
+const propertyRoute = require('./Routes/PropertyRoute');
 const port = process.env.PORT || 3000; // You can use environment variables for port configuration
 
 
@@ -27,6 +29,7 @@ mongoose.connect(process.env.URI).then(() => {
 
 //Routes
 app.use('/users', usersRoute);
+app.use('/properties', propertyRoute);
   
  
 

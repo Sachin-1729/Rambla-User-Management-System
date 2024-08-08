@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -11,10 +11,8 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import axios from "axios";
-
-import Count from "../context/Count";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../components/providers/AuthProvider";
 
 function Copyright(props) {
   return (
@@ -35,34 +33,50 @@ function Copyright(props) {
 }
 
 export default function SignIn() {
-  const [title, setTitle] = useContext(Count);
+  const { login } = useContext(AuthContext); // Use login from AuthContext
+  const [error, setError] = useState(null); // State for error handling
+  const [loading, setLoading] = useState(false); // State for loading
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true); // Set loading state
+    setError(null); // Clear any previous error
+
     const data = new FormData(event.currentTarget);
-    const loginData = {
-      email: data.get("email"),
-      password: data.get("password"),
-    };
+    const email = data.get("email");
+    const password = data.get("password");
+
     try {
-      const response = await axios.post(
-        "http://localhost:7000/users/login",
-        loginData
-       
-      );
-      setTimeout(()=>{ navigate("/users");},2000)
-      console.log(response.data);
-      // Handle successful login here, e.g., save token, redirect, etc.
-    } catch (error) {
-      console.error("There was an error logging in!", error);
-      // Handle login error here, e.g., show error message.
+      const response = await fetch("http://localhost:7000/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email:email, password: password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const result = await response.json();
+      // Call the login function from AuthContext
+      login({
+        token: result.token,
+        user: result.user
+      });
+      
+
+      navigate("/"); // Redirect to a protected route
+    } catch (err) {
+      setError(err.message || "There was an error logging in!"); // Update error state
+      console.error(err);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
-
-  useEffect(() => {
-    setTitle("Sign in");
-  }, [setTitle]);
 
   return (
     <Container component="main" maxWidth="xs">
@@ -111,9 +125,11 @@ export default function SignIn() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
           >
             Sign In
           </Button>
+          {error && <Typography color="error">{error}</Typography>}
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -132,3 +148,4 @@ export default function SignIn() {
     </Container>
   );
 }
+

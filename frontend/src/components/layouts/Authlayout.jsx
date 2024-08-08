@@ -1,23 +1,21 @@
-import React from 'react'
-import { useAuth } from './../../context/Authcontext';
-
-
-import {Outlet , useNavigate} from "react-router-dom"
-
+import React, { useEffect,useContext } from 'react';
+import { Outlet,Navigate } from 'react-router-dom';
+import { isLogin } from '../../auth';
+import AuthContext from '../providers/AuthProvider';
 
 function Authlayout() {
-const { user } = useAuth();
-const Navigate = useNavigate();
-if(user)
-{
-    return <Outlet/>
+  const { user } = useContext(AuthContext);
+  return (
+    <>
+    {
+        isLogin()
+          ?
+          <Outlet />
+          :
+          <Navigate to="/login" />
+      }
+      </>
+  )
 }
-else
-{ 
-    Navigate("/login")
 
-}
-
-}
-
-export default Authlayout
+export default Authlayout;
